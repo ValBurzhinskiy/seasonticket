@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="type">
+        <item>4 тренировки (1 раз в неделю)</item>
+        <item>8 тренировок (2 раза в неделю)</item>
+        <item>12 тренировок (3 раза в неделю)</item>
+        <item>16 тренировок (4 раза в неделю)</item>
+    </string-array>
+</resources>
