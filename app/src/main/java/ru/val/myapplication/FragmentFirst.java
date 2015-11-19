@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,15 +24,17 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import ru.val.myapplication.model.Seasonticket;
 import ru.val.myapplication.util.DividerItemDecoration;
 import ru.val.myapplication.util.RVAdapter;
 
 
 public class FragmentFirst extends Fragment implements View.OnClickListener {
-    private Calendar now = Calendar.getInstance();
+    private Seasonticket seasonticket = Seasonticket.getInstance();
+
     private int currentCount, maxCount;
     private List<String> visits;
-    private String srok;
+    private String period;
 
     private FloatingActionButton fab;
     private TextView tvProgressValue;
@@ -51,6 +54,7 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("myLog", "FragmentFirst. Method onCreate");
     }
 
     @Override
@@ -70,20 +74,19 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
-
+        Log.d("myLog", "FragmentFirst. Method onStart");
         //Блок инициализации билета. Загрузка посещиний и срока действия
-        readFile();
-        //
-        visits = new ArrayList<>();
-        String currentDate = "" + now.get(Calendar.DAY_OF_MONTH) + "." + (now.get(Calendar.MONTH) + 1) + "." + now.get(Calendar.YEAR);
-        visits.add(String.format(getResources().getString(R.string.item_date), currentDate));
-        currentCount = visits.size();
-        maxCount = 12;
+//        if (!seasonticket.getPeriod().isEmpty()) {
+            period = seasonticket.getPeriod();
+            visits = seasonticket.getVisits();
+            currentCount = visits.size();
+            maxCount = seasonticket.getMaxCount();
+//        }
         //
 
         progressBar.setMax(maxCount);
         progressBar.setProgress(currentCount);
-        tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), srok));
+        tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), period));
         tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), currentCount, maxCount));
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
@@ -96,9 +99,17 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
 
     }
 
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("myLog", "FragmentFirst. Method onPause");
+    }
+
     @Override
     public void onClick(View v) {
         if (visits.size() < maxCount) {
+            Calendar now = Calendar.getInstance();
             String currentDate = "" + now.get(Calendar.DAY_OF_MONTH) + "." + (now.get(Calendar.MONTH) + 1) + "." + now.get(Calendar.YEAR);
             visits.add(String.format(getResources().getString(R.string.item_date), currentDate));
 
@@ -113,28 +124,5 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
                     .setAction("Action", null).show();
     }
 
-    public void readFile() {
-        String mFileName = "seasonticket";
-        FileInputStream stream;
-        StringBuilder sb = new StringBuilder();
-        String line;
 
-        try {
-            stream = getActivity().openFileInput(mFileName);
-
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            } finally {
-                stream.close();
-            }
-
-             srok = sb.toString();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

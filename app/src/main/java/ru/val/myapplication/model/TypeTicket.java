@@ -1,4 +1,4 @@
-package ru.val.myapplication.util;
+package ru.val.myapplication.model;
 
 
 public enum TypeTicket {
