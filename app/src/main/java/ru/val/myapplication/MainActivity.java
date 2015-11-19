@@ -9,13 +9,16 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+import ru.val.myapplication.model.Seasonticket;
 
+public class MainActivity extends AppCompatActivity {
+    private Seasonticket seasonticket = Seasonticket.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        seasonticket.readFile(this);
 
         SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -26,6 +29,18 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        seasonticket.writeToFile(this);
+//        this.deleteFile("seasonticket1");
+    }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 

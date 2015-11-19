@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true">
+        android:layout_marginTop="56dp">
 
         <LinearLayout
             android:orientation="horizontal"
@@ -22,7 +22,7 @@
 
             <TextView
                 android:id="@+id/tvStartDate"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:text="@string/start_date_format"
                 android:layout_weight="1"
@@ -37,7 +37,7 @@
                 android:cropToPadding="true"
                 android:background="@color/mainBackground"
                 android:scaleType="centerCrop"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical"/>
         </LinearLayout>
 
         <LinearLayout
@@ -50,7 +50,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/end_date_format"
-                android:layout_weight="1"
                 android:gravity="center_vertical"
                 android:textSize="16sp" />
         </LinearLayout>

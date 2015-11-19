@@ -1,12 +1,12 @@
 package ru.val.myapplication.model;
 
 
-//import android.content.Context;
-//
-//import java.io.BufferedReader;
-//import java.io.FileInputStream;
-//import java.io.FileOutputStream;
-//import java.io.InputStreamReader;
+import android.content.Context;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 
 import android.util.Log;
 
@@ -67,7 +67,6 @@ public class Seasonticket {
         boolean valid = false;
         if (!mEndDate.isEmpty()) {
             Calendar endCalendar = DateConverter.stringToDate(mEndDate);
-            Log.d("myLog", "visits.size() = " + visits.size() + "; mMaxCount = " + mMaxCount);
             if (currentCalendar.before(endCalendar) & visits.size() < mMaxCount)
                 valid = true;
             else
@@ -77,40 +76,55 @@ public class Seasonticket {
     }
 
 
-//    public void writeToFile(Context context){
-//        try{
-//            FileOutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
-//            output.write(mStartDate.getBytes());
-//            output.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void writeToFile(Context context) {
+        if (!this.mStartDate.isEmpty()) {
+            try {
+                FileOutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
+                String str = mStartDate + "\n" + mEndDate + "\n" + mMaxCount;
+                for(int i = 0; i < visits.size(); i++)
+                    str +="\n" + visits.get(i);
+                Log.d("myLog", "Записал: " + str);
+                output.write(str.getBytes());
+                output.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-//    public void readFile(Context context) {
-//
-//        FileInputStream stream;
-//        StringBuilder sb = new StringBuilder();
-//        String line;
-//
-//        try {
-//            stream = context.openFileInput(FILE_NAME);
-//
-//            try {
-//                BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-//                while ((line = reader.readLine()) != null) {
-//                    sb.append(line);
-//                }
-//            } finally {
-//                stream.close();
-//            }
-//
-////            srok = sb.toString();
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void readFile(Context context) {
+
+        FileInputStream stream;
+        List<String> list = new ArrayList<>();
+        String line;
+
+        try {
+            stream = context.openFileInput(FILE_NAME);
+
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+                while ((line = reader.readLine()) != null) {
+                    list.add(line);
+                }
+            } finally {
+                stream.close();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (!list.isEmpty()) {
+            this.mStartDate = list.get(0);
+            this.mEndDate = list.get(1);
+            this.mMaxCount = Integer.parseInt(list.get(2));
+            for(int i =3; i < list.size(); i++)
+                this.visits.add(list.get(i));
+            Log.d("myLog", "Прочитал: mStartDate = " + this.mStartDate + ", mEndDate = " + this.mEndDate + ", mMaxCount = " + mMaxCount);
+        } else {
+            Log.d("myLog", "File null");
+        }
+    }
 
 
 }
