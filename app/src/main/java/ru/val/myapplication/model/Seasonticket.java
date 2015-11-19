@@ -8,9 +8,13 @@ package ru.val.myapplication.model;
 //import java.io.FileOutputStream;
 //import java.io.InputStreamReader;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import ru.val.myapplication.util.DateConverter;
 
 public class Seasonticket {
     private static final String FILE_NAME = "seasonticket";
@@ -36,10 +40,11 @@ public class Seasonticket {
         this.mStartDate = mStartDate;
         this.mEndDate = mEndDate;
         this.mMaxCount = mMaxCount;
+        this.visits.clear();
     }
 
     public String getPeriod() {
-        if(!this.mStartDate.isEmpty())
+        if (!this.mStartDate.isEmpty())
             return this.mStartDate.concat(" - ").concat(this.mEndDate);
         return "";
     }
@@ -52,28 +57,25 @@ public class Seasonticket {
         return this.visits;
     }
 
+    public void add(String str) {
+        this.visits.add(str);
+    }
+
     public boolean isValid() {
         // Проверка сроков и кол-ва посещений
         Calendar currentCalendar = Calendar.getInstance();
-        boolean isvalid = false;
-        try {
-            Calendar endCalendar = getCalendar(mEndDate);
-            if (currentCalendar.before(endCalendar))
-                isvalid = true;
-        } catch (NumberFormatException e){
-
+        boolean valid = false;
+        if (!mEndDate.isEmpty()) {
+            Calendar endCalendar = DateConverter.stringToDate(mEndDate);
+            Log.d("myLog", "visits.size() = " + visits.size() + "; mMaxCount = " + mMaxCount);
+            if (currentCalendar.before(endCalendar) & visits.size() < mMaxCount)
+                valid = true;
+            else
+                valid = false;
         }
-        return isvalid;
+        return valid;
     }
 
-    private Calendar getCalendar(String date) throws NumberFormatException{
-        String str[] = date.split("\\W{1}");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(str[0]));
-        calendar.set(Calendar.MONTH, Integer.parseInt(str[1]));
-        calendar.set(Calendar.YEAR, Integer.parseInt(str[2]));
-        return calendar;
-    }
 
 //    public void writeToFile(Context context){
 //        try{

@@ -25,12 +25,13 @@ import java.util.Calendar;
 import java.util.List;
 
 import ru.val.myapplication.model.Seasonticket;
+import ru.val.myapplication.util.DateConverter;
 import ru.val.myapplication.util.DividerItemDecoration;
 import ru.val.myapplication.util.RVAdapter;
 
 
 public class FragmentFirst extends Fragment implements View.OnClickListener {
-    private Seasonticket seasonticket = Seasonticket.getInstance();
+    private Seasonticket seasonticket;
 
     private int currentCount, maxCount;
     private List<String> visits;
@@ -54,7 +55,6 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("myLog", "FragmentFirst. Method onCreate");
     }
 
     @Override
@@ -74,14 +74,14 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("myLog", "FragmentFirst. Method onStart");
-        //Блок инициализации билета. Загрузка посещиний и срока действия
-//        if (!seasonticket.getPeriod().isEmpty()) {
-            period = seasonticket.getPeriod();
-            visits = seasonticket.getVisits();
-            currentCount = visits.size();
-            maxCount = seasonticket.getMaxCount();
-//        }
+        //Блок инициализации билета. Загрузка действующего билета
+        seasonticket = Seasonticket.getInstance();
+        period = seasonticket.getPeriod();
+        // оставить только seasonticket.getVisits()
+        visits = seasonticket.getVisits();
+        currentCount = visits.size();
+        maxCount = seasonticket.getMaxCount();
+
         //
 
         progressBar.setMax(maxCount);
@@ -92,28 +92,21 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(llm);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-        adapter = new RVAdapter(visits);
+//        adapter = new RVAdapter(visits);
+        adapter = new RVAdapter(seasonticket.getVisits());
         recyclerView.setAdapter(adapter);
 
         fab.setOnClickListener(this);
 
     }
 
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("myLog", "FragmentFirst. Method onPause");
-    }
-
     @Override
     public void onClick(View v) {
         if (visits.size() < maxCount) {
             Calendar now = Calendar.getInstance();
-            String currentDate = "" + now.get(Calendar.DAY_OF_MONTH) + "." + (now.get(Calendar.MONTH) + 1) + "." + now.get(Calendar.YEAR);
-            visits.add(String.format(getResources().getString(R.string.item_date), currentDate));
+            String currentDate = DateConverter.dateToString(getActivity(), now);
 
-            // Отслеживаем прогресс
+            seasonticket.add(String.format(getResources().getString(R.string.item_date), currentDate));
             progressBar.setProgress(visits.size());
             tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), visits.size(), maxCount));
             //

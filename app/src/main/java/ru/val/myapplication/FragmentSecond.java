@@ -18,6 +18,7 @@ import java.util.Calendar;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 import ru.val.myapplication.model.Seasonticket;
 import ru.val.myapplication.model.TypeTicket;
+import ru.val.myapplication.util.DateConverter;
 
 
 public class FragmentSecond extends Fragment implements AdapterView.OnItemSelectedListener {
@@ -64,12 +65,12 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
     public void onStart() {
         super.onStart();
         nowCalendar = Calendar.getInstance();
-        startDate = "" + nowCalendar.get(Calendar.DAY_OF_MONTH) + "/" + (nowCalendar.get(Calendar.MONTH) + 1) + "/" + nowCalendar.get(Calendar.YEAR);
+        startDate = DateConverter.dateToString(getActivity(), nowCalendar);
         tvStartDate.setText(String.format(getResources().getString(R.string.start_date_format), startDate));
 
         endCalendar = Calendar.getInstance();
         endCalendar.add(Calendar.DATE, 28);
-        endDate = "" + endCalendar.get(Calendar.DAY_OF_MONTH) + "/" + (endCalendar.get(Calendar.MONTH) + 1) + "/" + endCalendar.get(Calendar.YEAR);
+        endDate = DateConverter.dateToString(getActivity(), endCalendar);
         tvEndDate.setText(String.format(getResources().getString(R.string.end_date_format), endDate));
 
         spinnerType.setSelection(2);
@@ -119,14 +120,14 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
 
         @Override
         public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-            startDate = "" + dayOfMonth + "/" + (monthOfYear + 1) + "/" + year;
+            startDate = DateConverter.dateToString(getActivity(), dayOfMonth, monthOfYear, year);
             tvStartDate.setText(String.format(getResources().getString(R.string.start_date_format), startDate));
 
             endCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             endCalendar.set(Calendar.MONTH, monthOfYear);
             endCalendar.set(Calendar.YEAR, year);
             endCalendar.add(Calendar.DATE, 28);
-            endDate = "" + endCalendar.get(Calendar.DAY_OF_MONTH) + "/" + (endCalendar.get(Calendar.MONTH) + 1) + "/" + endCalendar.get(Calendar.YEAR);
+            endDate = DateConverter.dateToString(getActivity(), endCalendar);
             tvEndDate.setText(String.format(getResources().getString(R.string.end_date_format), endDate));
         }
     };
