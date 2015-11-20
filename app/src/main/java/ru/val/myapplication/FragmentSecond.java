@@ -16,6 +16,7 @@ import android.widget.TextView;
 import java.util.Calendar;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
 import ru.val.myapplication.model.Seasonticket;
 import ru.val.myapplication.model.TypeTicket;
 import ru.val.myapplication.util.DateConverter;
@@ -94,7 +95,7 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
             public void onClick(View v) {
                 StringBuilder str = new StringBuilder();
                 if (!seasonticket.isValid()) {
-                    str.append("Колличество тренировок = ").append(maxCount).append("\n");
+                    str.append(String.format(getResources().getString(R.string.dialog_count_format), maxCount)).append("\n");
                     str.append(String.format(getResources().getString(R.string.start_date_format), startDate)).append("\n");
                     str.append(String.format(getResources().getString(R.string.end_date_format), endDate));
 
@@ -102,15 +103,13 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
                     seasonticket.createSeasonticket(startDate, endDate, maxCount);
                     //Обновление первого фрагмента
                 } else
-                    str.append("Есть действительный билет");
+                    str.append(getResources().getString(R.string.dialog_text));
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Новый абонемент");
+                builder.setTitle(getResources().getString(R.string.dialog_title_new));
                 builder.setMessage(str);
-                builder.setPositiveButton("OK", null);
+                builder.setPositiveButton(getResources().getString(R.string.dialog_positive_button), null);
                 builder.show();
-
-
             }
         });
 
@@ -154,6 +153,4 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-
-
 }

@@ -2,14 +2,11 @@ package ru.val.myapplication.model;
 
 
 import android.content.Context;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-
 import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -17,7 +14,7 @@ import java.util.List;
 import ru.val.myapplication.util.DateConverter;
 
 public class Seasonticket {
-    private static final String FILE_NAME = "seasonticket";
+    private static final String FILE_NAME = "seasonticket.txt";
     private String mStartDate, mEndDate;
     private int mMaxCount;
     private List<String> visits;
@@ -67,64 +64,61 @@ public class Seasonticket {
         boolean valid = false;
         if (!mEndDate.isEmpty()) {
             Calendar endCalendar = DateConverter.stringToDate(mEndDate);
-            if (currentCalendar.before(endCalendar) & visits.size() < mMaxCount)
-                valid = true;
-            else
-                valid = false;
+            valid = currentCalendar.before(endCalendar) & visits.size() < mMaxCount;
         }
         return valid;
     }
 
 
     public void writeToFile(Context context) {
+        FileOutputStream output = null;
         if (!this.mStartDate.isEmpty()) {
             try {
-                FileOutputStream output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
+                output = context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE);
                 String str = mStartDate + "\n" + mEndDate + "\n" + mMaxCount;
-                for(int i = 0; i < visits.size(); i++)
-                    str +="\n" + visits.get(i);
-                Log.d("myLog", "Записал: " + str);
+                for (int i = 0; i < visits.size(); i++)
+                    str += "\n" + visits.get(i);
                 output.write(str.getBytes());
-                output.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.d("myLog", "Ошибка записи: " + e.getMessage());
+            } finally {
+                try {
+                    if (output != null)
+                        output.close();
+                } catch (Exception e) {
+                    Log.d("myLog", "Ошибка закрытия файла: " + e.getMessage());
+                }
             }
         }
     }
 
     public void readFile(Context context) {
 
-        FileInputStream stream;
+        FileInputStream input = null;
         List<String> list = new ArrayList<>();
         String line;
-
         try {
-            stream = context.openFileInput(FILE_NAME);
-
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-                while ((line = reader.readLine()) != null) {
-                    list.add(line);
-                }
-            } finally {
-                stream.close();
+            input = context.openFileInput(FILE_NAME);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input, "UTF-8"));
+            while ((line = reader.readLine()) != null) {
+                list.add(line);
             }
-
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d("myLog", "Ошибка чтения: " + e.getMessage());
+        } finally {
+            try {
+                if (input != null)
+                    input.close();
+            } catch (Exception e) {
+                Log.d("myLog", "Ошибка закрытия файла: " + e.getMessage());
+            }
         }
-
         if (!list.isEmpty()) {
             this.mStartDate = list.get(0);
             this.mEndDate = list.get(1);
             this.mMaxCount = Integer.parseInt(list.get(2));
-            for(int i =3; i < list.size(); i++)
+            for (int i = 3; i < list.size(); i++)
                 this.visits.add(list.get(i));
-            Log.d("myLog", "Прочитал: mStartDate = " + this.mStartDate + ", mEndDate = " + this.mEndDate + ", mMaxCount = " + mMaxCount);
-        } else {
-            Log.d("myLog", "File null");
         }
     }
-
-
 }

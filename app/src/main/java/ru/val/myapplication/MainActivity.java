@@ -18,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        seasonticket.readFile(this);
 
         SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -32,14 +31,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+        seasonticket.readFile(this);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
         seasonticket.writeToFile(this);
-//        this.deleteFile("seasonticket1");
+//        this.deleteFile("seasonticket.txt");
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -68,13 +67,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Текущий";
+                    return getResources().getString(R.string.tabs_title_0);
                 case 1:
-                    return "Новый";
+                    return getResources().getString(R.string.tabs_title_1);
             }
             return null;
         }
     }
-
-
 }

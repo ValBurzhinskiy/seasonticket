@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,12 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -70,10 +64,10 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         return rootView;
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
+
         //Блок инициализации билета. Загрузка действующего билета
         seasonticket = Seasonticket.getInstance();
         period = seasonticket.getPeriod();
@@ -81,8 +75,6 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         visits = seasonticket.getVisits();
         currentCount = visits.size();
         maxCount = seasonticket.getMaxCount();
-
-        //
 
         progressBar.setMax(maxCount);
         progressBar.setProgress(currentCount);
@@ -92,30 +84,50 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(llm);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-//        adapter = new RVAdapter(visits);
         adapter = new RVAdapter(seasonticket.getVisits());
         recyclerView.setAdapter(adapter);
 
         fab.setOnClickListener(this);
-
     }
+
 
     @Override
     public void onClick(View v) {
-        if (visits.size() < maxCount) {
-            Calendar now = Calendar.getInstance();
-            String currentDate = DateConverter.dateToString(getActivity(), now);
+        if (period.isEmpty())
+            showDialog(0);
+        else {
+            if (seasonticket.isValid()) {
+                Calendar now = Calendar.getInstance();
+                String currentDate = DateConverter.dateToString(getActivity(), now);
 
-            seasonticket.add(String.format(getResources().getString(R.string.item_date), currentDate));
-            progressBar.setProgress(visits.size());
-            tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), visits.size(), maxCount));
-            //
+                seasonticket.add(String.format(getResources().getString(R.string.item_date), currentDate));
+                progressBar.setProgress(visits.size());
+                tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), visits.size(), maxCount));
+                //
 
-            adapter.notifyDataSetChanged();
-        } else
-            Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+                adapter.notifyDataSetChanged();
+            } else {
+                showDialog(1);
+            }
+        }
     }
 
-
+    private void showDialog(int idDialog){
+        String title = "", message = "";
+        switch (idDialog){
+            case 0:
+                title = getResources().getString(R.string.dialog_title_alert_null);
+                message = getResources().getString(R.string.dialog_text_alert_null);
+                break;
+            case 1:
+                title = getResources().getString(R.string.dialog_title_alert_old);
+                message = getResources().getString(R.string.dialog_text_alert_old);
+                break;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(getResources().getString(R.string.dialog_positive_button), null);
+        builder.show();
+    }
 }
