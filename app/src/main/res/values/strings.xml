@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">My Seasonticket</string>
     <string name="tabs_title_0">Текущий</string>
     <string name="tabs_title_1">Новый</string>
 

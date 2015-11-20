@@ -117,6 +117,7 @@ public class Seasonticket {
             this.mStartDate = list.get(0);
             this.mEndDate = list.get(1);
             this.mMaxCount = Integer.parseInt(list.get(2));
+            this.visits.clear();
             for (int i = 3; i < list.size(); i++)
                 this.visits.add(list.get(i));
         }
