@@ -18,13 +18,14 @@ import android.widget.TextView;
 import java.util.Calendar;
 import java.util.List;
 
+import ru.val.myapplication.interfaces.Observer;
 import ru.val.myapplication.model.Seasonticket;
 import ru.val.myapplication.util.DateConverter;
 import ru.val.myapplication.util.DividerItemDecoration;
 import ru.val.myapplication.util.RVAdapter;
 
 
-public class FragmentFirst extends Fragment implements View.OnClickListener {
+public class FragmentFirst extends Fragment implements View.OnClickListener, Observer {
     private Seasonticket seasonticket;
 
     private int currentCount, maxCount;
@@ -68,18 +69,17 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
     public void onStart() {
         super.onStart();
 
-        //Блок инициализации билета. Загрузка действующего билета
+        //Загрузка действующего билета
         seasonticket = Seasonticket.getInstance();
+        //Регистрируем слушателя на изменение данных профиля
+        seasonticket.registerObserver(this);
+
         period = seasonticket.getPeriod();
         // оставить только seasonticket.getVisits()
         visits = seasonticket.getVisits();
-        currentCount = visits.size();
         maxCount = seasonticket.getMaxCount();
 
-        progressBar.setMax(maxCount);
-        progressBar.setProgress(currentCount);
-        tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), period));
-        tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), currentCount, maxCount));
+        setInfo();
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(llm);
@@ -88,6 +88,14 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         recyclerView.setAdapter(adapter);
 
         fab.setOnClickListener(this);
+    }
+
+    protected void setInfo(){
+        currentCount = visits.size();
+        progressBar.setMax(maxCount);
+        progressBar.setProgress(currentCount);
+        tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), period));
+        tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), currentCount, maxCount));
     }
 
 
@@ -129,5 +137,14 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         builder.setMessage(message);
         builder.setPositiveButton(getResources().getString(R.string.dialog_positive_button), null);
         builder.show();
+    }
+
+    @Override
+    public void update(String period, int maxCount) {
+        this.period = period;
+        this.maxCount = maxCount;
+        visits.clear();
+
+        setInfo();
     }
 }
