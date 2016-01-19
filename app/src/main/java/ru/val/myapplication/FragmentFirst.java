@@ -5,33 +5,31 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import ru.val.myapplication.model.Seasonticket;
+import ru.val.myapplication.util.DateConverter;
 import ru.val.myapplication.util.DividerItemDecoration;
 import ru.val.myapplication.util.RVAdapter;
 
 
-public class FragmentFirst extends Fragment implements View.OnClickListener {
-    private Calendar now = Calendar.getInstance();
+public class FragmentFirst extends Fragment implements View.OnClickListener{
+    private Seasonticket seasonticket;
+
     private int currentCount, maxCount;
     private List<String> visits;
-    private String srok;
+    private String period;
 
     private FloatingActionButton fab;
     private TextView tvProgressValue;
@@ -66,75 +64,77 @@ public class FragmentFirst extends Fragment implements View.OnClickListener {
         return rootView;
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
 
-        //Блок инициализации билета. Загрузка посещиний и срока действия
-        readFile();
-        //
-        visits = new ArrayList<>();
-        String currentDate = "" + now.get(Calendar.DAY_OF_MONTH) + "." + (now.get(Calendar.MONTH) + 1) + "." + now.get(Calendar.YEAR);
-        visits.add(String.format(getResources().getString(R.string.item_date), currentDate));
-        currentCount = visits.size();
-        maxCount = 12;
-        //
+        //Загрузка действующего билета
+        seasonticket = Seasonticket.getInstance();
 
-        progressBar.setMax(maxCount);
-        progressBar.setProgress(currentCount);
-        tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), srok));
-        tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), currentCount, maxCount));
+        period = seasonticket.getPeriod();
+        // оставить только seasonticket.getVisits()
+        visits = seasonticket.getVisits();
+        maxCount = seasonticket.getMaxCount();
+
+        setInfo();
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(llm);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-        adapter = new RVAdapter(visits);
+        adapter = new RVAdapter(seasonticket.getVisits());
         recyclerView.setAdapter(adapter);
 
         fab.setOnClickListener(this);
-
     }
+
+    protected void setInfo(){
+        currentCount = visits.size();
+        progressBar.setMax(maxCount);
+        progressBar.setProgress(currentCount);
+        tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), period));
+        tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), currentCount, maxCount));
+    }
+
 
     @Override
     public void onClick(View v) {
-        if (visits.size() < maxCount) {
-            String currentDate = "" + now.get(Calendar.DAY_OF_MONTH) + "." + (now.get(Calendar.MONTH) + 1) + "." + now.get(Calendar.YEAR);
-            visits.add(String.format(getResources().getString(R.string.item_date), currentDate));
+        if (period.isEmpty())
+            showDialog(0);
+        else {
+            if (seasonticket.isValid()) {
+                Calendar now = Calendar.getInstance();
+                String currentDate = DateConverter.dateToString(getActivity(), now);
 
-            // Отслеживаем прогресс
-            progressBar.setProgress(visits.size());
-            tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), visits.size(), maxCount));
-            //
+                seasonticket.add(String.format(getResources().getString(R.string.item_date), currentDate));
+                progressBar.setProgress(visits.size());
+                tvProgressValue.setText(String.format(getResources().getString(R.string.progress_value), visits.size(), maxCount));
+                //
 
-            adapter.notifyDataSetChanged();
-        } else
-            Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-    }
-
-    public void readFile() {
-        String mFileName = "seasonticket";
-        FileInputStream stream;
-        StringBuilder sb = new StringBuilder();
-        String line;
-
-        try {
-            stream = getActivity().openFileInput(mFileName);
-
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            } finally {
-                stream.close();
+                adapter.notifyDataSetChanged();
+            } else {
+                showDialog(1);
             }
-
-             srok = sb.toString();
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
+
+    private void showDialog(int idDialog){
+        String title = "", message = "";
+        switch (idDialog){
+            case 0:
+                title = getResources().getString(R.string.dialog_title_alert_null);
+                message = getResources().getString(R.string.dialog_text_alert_null);
+                break;
+            case 1:
+                title = getResources().getString(R.string.dialog_title_alert_old);
+                message = getResources().getString(R.string.dialog_text_alert_old);
+                break;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(getResources().getString(R.string.dialog_positive_button), null);
+        builder.show();
+    }
+
+
 }

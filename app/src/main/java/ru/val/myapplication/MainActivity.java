@@ -9,8 +9,10 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
-public class MainActivity extends AppCompatActivity {
+import ru.val.myapplication.model.Seasonticket;
 
+public class MainActivity extends AppCompatActivity {
+    private Seasonticket seasonticket = Seasonticket.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +28,18 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        seasonticket.readFile(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        seasonticket.writeToFile(this);
+//        this.deleteFile("seasonticket.txt");
+    }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -53,13 +67,11 @@ public class MainActivity extends AppCompatActivity {
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Текущий";
+                    return getResources().getString(R.string.tabs_title_0);
                 case 1:
-                    return "Новый";
+                    return getResources().getString(R.string.tabs_title_1);
             }
             return null;
         }
     }
-
-
 }

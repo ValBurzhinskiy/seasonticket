@@ -1,7 +1,6 @@
 package ru.val.myapplication;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -14,18 +13,21 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-
-import java.io.FileOutputStream;
 import java.util.Calendar;
 
-import ru.val.myapplication.util.TypeTicket;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
+import ru.val.myapplication.model.Seasonticket;
+import ru.val.myapplication.model.TypeTicket;
+import ru.val.myapplication.util.DateConverter;
 
 
-public class FragmentSecond extends Fragment implements AdapterView.OnItemSelectedListener{
+public class FragmentSecond extends Fragment implements AdapterView.OnItemSelectedListener {
 
-    private Calendar now = Calendar.getInstance();
-    private Calendar now2 = Calendar.getInstance();
+    private Seasonticket seasonticket = Seasonticket.getInstance();
+
+    private Calendar nowCalendar;
+    private Calendar endCalendar;
     private String startDate, endDate;
     private int maxCount;
 
@@ -44,7 +46,6 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -64,11 +65,13 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onStart() {
         super.onStart();
-        startDate = "" + now.get(Calendar.DAY_OF_MONTH) + "/" + (now.get(Calendar.MONTH) + 1) + "/" + now.get(Calendar.YEAR);
+        nowCalendar = Calendar.getInstance();
+        startDate = DateConverter.dateToString(getActivity(), nowCalendar);
         tvStartDate.setText(String.format(getResources().getString(R.string.start_date_format), startDate));
 
-        now2.add(Calendar.DATE, 28);
-        endDate = "" + now2.get(Calendar.DAY_OF_MONTH) + "/" + (now2.get(Calendar.MONTH) + 1) + "/" + now2.get(Calendar.YEAR);
+        endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.DATE, 28);
+        endDate = DateConverter.dateToString(getActivity(), endCalendar);
         tvEndDate.setText(String.format(getResources().getString(R.string.end_date_format), endDate));
 
         spinnerType.setSelection(2);
@@ -79,9 +82,9 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
             public void onClick(View v) {
                 DatePickerDialog dpd = DatePickerDialog.newInstance(
                         mDateSetListener,
-                        now.get(Calendar.YEAR),
-                        now.get(Calendar.MONTH),
-                        now.get(Calendar.DAY_OF_MONTH)
+                        nowCalendar.get(Calendar.YEAR),
+                        nowCalendar.get(Calendar.MONTH),
+                        nowCalendar.get(Calendar.DAY_OF_MONTH)
                 );
                 dpd.show(getActivity().getFragmentManager(), "Datepickerdialog");
             }
@@ -91,17 +94,22 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
             @Override
             public void onClick(View v) {
                 StringBuilder str = new StringBuilder();
-                str.append("Колличество тренировок = " + maxCount + "\n" +
-                        String.format(getResources().getString(R.string.start_date_format), startDate) + "\n" +
-                        String.format(getResources().getString(R.string.end_date_format), endDate));
+                if (!seasonticket.isValid()) {
+                    str.append(String.format(getResources().getString(R.string.dialog_count_format), maxCount)).append("\n");
+                    str.append(String.format(getResources().getString(R.string.start_date_format), startDate)).append("\n");
+                    str.append(String.format(getResources().getString(R.string.end_date_format), endDate));
+
+                    //Вынести ли на кнопку ОК диалога? Чтобы дать возможность отменить.
+                    seasonticket.createSeasonticket(startDate, endDate, maxCount);
+                    //Обновление первого фрагмента
+                } else
+                    str.append(getResources().getString(R.string.dialog_text));
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setTitle("Новый абонемент");
+                builder.setTitle(getResources().getString(R.string.dialog_title_new));
                 builder.setMessage(str);
-                builder.setPositiveButton("OK", null);
+                builder.setPositiveButton(getResources().getString(R.string.dialog_positive_button), null);
                 builder.show();
-
-                writeToFile();
             }
         });
 
@@ -111,14 +119,14 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
 
         @Override
         public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-            startDate = "" + dayOfMonth + "/" + (monthOfYear + 1) + "/" + year;
+            startDate = DateConverter.dateToString(getActivity(), dayOfMonth, monthOfYear, year);
             tvStartDate.setText(String.format(getResources().getString(R.string.start_date_format), startDate));
 
-            now2.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            now2.set(Calendar.MONTH, monthOfYear);
-            now2.set(Calendar.YEAR, year);
-            now2.add(Calendar.DATE, 28);
-            endDate = "" + now2.get(Calendar.DAY_OF_MONTH) + "/" + (now2.get(Calendar.MONTH) + 1) + "/" + now2.get(Calendar.YEAR);
+            endCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            endCalendar.set(Calendar.MONTH, monthOfYear);
+            endCalendar.set(Calendar.YEAR, year);
+            endCalendar.add(Calendar.DATE, 28);
+            endDate = DateConverter.dateToString(getActivity(), endCalendar);
             tvEndDate.setText(String.format(getResources().getString(R.string.end_date_format), endDate));
         }
     };
@@ -144,16 +152,5 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
-    }
-
-    public void writeToFile(){
-        String mFileName = "seasonticket";
-        try{
-            FileOutputStream output = getActivity().openFileOutput(mFileName, Context.MODE_PRIVATE);
-            output.write(startDate.getBytes());
-            output.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
