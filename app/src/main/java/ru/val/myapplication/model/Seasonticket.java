@@ -11,18 +11,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import ru.val.myapplication.interfaces.Observable;
-import ru.val.myapplication.interfaces.Observer;
 import ru.val.myapplication.util.DateConverter;
 
-public class Seasonticket implements Observable {
+public class Seasonticket {
     private static final String FILE_NAME = "seasonticket.txt";
     private String mStartDate, mEndDate;
     private int mMaxCount;
     private List<String> visits;
-
-    //список слушателей
-    private List<Observer> observers;
 
 
     private static Seasonticket ourInstance = new Seasonticket();
@@ -43,7 +38,6 @@ public class Seasonticket implements Observable {
         this.mEndDate = mEndDate;
         this.mMaxCount = mMaxCount;
         this.visits.clear();
-        notifyObservers();
     }
 
     public String getPeriod() {
@@ -129,22 +123,5 @@ public class Seasonticket implements Observable {
         }
     }
 
-    @Override
-    public void registerObserver(Observer o) {
-        observers.add(o);
-        Log.d("myLogs", "o1: " + o);
 
-    }
-
-    @Override
-    public void removeObserver(Observer o) {
-        observers.remove(o);
-    }
-
-    @Override
-    public void notifyObservers() {
-        for (Observer observer : observers) {
-//            observer.update(getPeriod(), mMaxCount);
-        }
-    }
 }

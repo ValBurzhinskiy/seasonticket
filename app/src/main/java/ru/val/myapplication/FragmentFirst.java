@@ -18,14 +18,13 @@ import android.widget.TextView;
 import java.util.Calendar;
 import java.util.List;
 
-import ru.val.myapplication.interfaces.Observer;
 import ru.val.myapplication.model.Seasonticket;
 import ru.val.myapplication.util.DateConverter;
 import ru.val.myapplication.util.DividerItemDecoration;
 import ru.val.myapplication.util.RVAdapter;
 
 
-public class FragmentFirst extends Fragment implements View.OnClickListener, Observer {
+public class FragmentFirst extends Fragment implements View.OnClickListener{
     private Seasonticket seasonticket;
 
     private int currentCount, maxCount;
@@ -71,8 +70,6 @@ public class FragmentFirst extends Fragment implements View.OnClickListener, Obs
 
         //Загрузка действующего билета
         seasonticket = Seasonticket.getInstance();
-        //Регистрируем слушателя на изменение данных профиля
-        seasonticket.registerObserver(this);
 
         period = seasonticket.getPeriod();
         // оставить только seasonticket.getVisits()
@@ -139,12 +136,5 @@ public class FragmentFirst extends Fragment implements View.OnClickListener, Obs
         builder.show();
     }
 
-    @Override
-    public void update(String period, int maxCount) {
-        this.period = period;
-        this.maxCount = maxCount;
-        visits.clear();
 
-        setInfo();
-    }
 }
