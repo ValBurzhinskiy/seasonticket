@@ -19,7 +19,7 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import ru.val.myapplication.model.Seasonticket;
 import ru.val.myapplication.model.TypeTicket;
-import ru.val.myapplication.util.DateConverter;
+import ru.val.myapplication.controller.DateConverter;
 
 
 public class FragmentSecond extends Fragment implements AdapterView.OnItemSelectedListener {
@@ -65,18 +65,18 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
     @Override
     public void onStart() {
         super.onStart();
-        nowCalendar = Calendar.getInstance();
-        startDate = DateConverter.dateToString(getActivity(), nowCalendar);
-        tvStartDate.setText(String.format(getResources().getString(R.string.start_date_format), startDate));
 
-        endCalendar = Calendar.getInstance();
-        endCalendar.add(Calendar.DATE, 28);
-        endDate = DateConverter.dateToString(getActivity(), endCalendar);
+        //получаем начальную и конечную даты по умолчанию
+        getDateInfo();
+        //выводим их на вьюшки
+        tvStartDate.setText(String.format(getResources().getString(R.string.start_date_format), startDate));
         tvEndDate.setText(String.format(getResources().getString(R.string.end_date_format), endDate));
 
+        //выпадающее меню
         spinnerType.setSelection(2);
         spinnerType.setOnItemSelectedListener(this);
 
+        //вызов календаря для выбора начальной даты
         btnStartDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,8 +100,12 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
                     str.append(String.format(getResources().getString(R.string.end_date_format), endDate));
 
                     //Вынести ли на кнопку ОК диалога? Чтобы дать возможность отменить.
-                    seasonticket.createSeasonticket(startDate, endDate, maxCount);
-                    //Обновление первого фрагмента
+                    seasonticket.setStartDate(startDate);
+                    seasonticket.setEndDate(endDate);
+                    seasonticket.setMaxCount(maxCount);
+                    seasonticket.clearVisits();
+
+                    //Как реализовать обновление первого фрагмента
                 } else
                     str.append(getResources().getString(R.string.dialog_text));
 
@@ -113,6 +117,15 @@ public class FragmentSecond extends Fragment implements AdapterView.OnItemSelect
             }
         });
 
+    }
+
+    private void getDateInfo(){
+        nowCalendar = Calendar.getInstance();
+        startDate = DateConverter.dateToString(getActivity(), nowCalendar);
+
+        endCalendar = Calendar.getInstance();
+        endCalendar.add(Calendar.DATE, 28);
+        endDate = DateConverter.dateToString(getActivity(), endCalendar);
     }
 
     private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {

@@ -9,10 +9,10 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
+import ru.val.myapplication.controller.SaveLoadTicket;
 import ru.val.myapplication.model.Seasonticket;
 
 public class MainActivity extends AppCompatActivity {
-    private Seasonticket seasonticket = Seasonticket.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +31,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        seasonticket.readFile(this);
+        //Читаем текущий абонемент из файла
+        SaveLoadTicket.LoadTicket(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        seasonticket.writeToFile(this);
-//        this.deleteFile("seasonticket.txt");
+        //Сохраняем текущий билет в файл
+        SaveLoadTicket.SaveTicket(this, Seasonticket.getInstance());
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
