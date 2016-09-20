@@ -3,12 +3,10 @@ package ru.val.myapplication;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import ru.val.myapplication.model.Seasonticket;
-import ru.val.myapplication.util.DateConverter;
+import ru.val.myapplication.controller.DateConverter;
 import ru.val.myapplication.util.DividerItemDecoration;
 import ru.val.myapplication.util.RVAdapter;
 
@@ -27,7 +25,7 @@ import ru.val.myapplication.util.RVAdapter;
 public class FragmentFirst extends Fragment implements View.OnClickListener{
     private Seasonticket seasonticket;
 
-    private int currentCount, maxCount;
+    private int maxCount;
     private List<String> visits;
     private String period;
 
@@ -69,13 +67,8 @@ public class FragmentFirst extends Fragment implements View.OnClickListener{
         super.onStart();
 
         //Загрузка действующего билета
-        seasonticket = Seasonticket.getInstance();
-
-        period = seasonticket.getPeriod();
-        // оставить только seasonticket.getVisits()
-        visits = seasonticket.getVisits();
-        maxCount = seasonticket.getMaxCount();
-
+        loadCurrentTicket();
+        //выводим информацию о билете на экран
         setInfo();
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
@@ -87,8 +80,16 @@ public class FragmentFirst extends Fragment implements View.OnClickListener{
         fab.setOnClickListener(this);
     }
 
-    protected void setInfo(){
-        currentCount = visits.size();
+    private void loadCurrentTicket(){
+        seasonticket = Seasonticket.getInstance();
+
+        period = seasonticket.getPeriod();
+        visits = seasonticket.getVisits();
+        maxCount = seasonticket.getMaxCount();
+    }
+
+    private void setInfo(){
+        int currentCount = visits.size();
         progressBar.setMax(maxCount);
         progressBar.setProgress(currentCount);
         tvPeriod.setText(String.format(getResources().getString(R.string.validity_period), period));
